@@ -1,0 +1,121 @@
+package one.one.one.one
+
+/* All declarations/statements are one-per-line; No semi-colon needed;
+   Comments are only multi-line;
+   Follow Java naming conventions.
+   `void` return types are disallowed throughout everything.
+   If a return type is omitted and not inferred, it'll be set to Object. */
+
+/* If no package is found you'll be in the "user" package.
+   Package names will also be used for Clojure namespace names. */
+
+import clojure.lang.IFn
+import jloj.lang.Func
+import jloj.lang.Jloj
+import java.util.stream.Collectors
+
+/* This will produce an interface and do the necessary Clojure protocol-map stuff */
+/* TODO: allow this to `extends` */
+protocol IStep {
+
+    /* Values are 'public static final'.
+       They are always determined to be the smallest possible primitive, boolean, String or Object for scalars.
+       Otherwise, requires Java type.
+       Type declarations are always used if supplied.
+       The right side of the assignment is Java code. */
+    val x = 5
+    val y : long = 19
+    val z = -2.54
+    val default_greeting = "Hello There"
+
+    /* Allowed, but discouraged.  Turned into a `static` on the Interface */
+    fn greeting [] : String {
+        return "Hello";
+    }
+
+    /* `Self` is always type Object */
+    sig hi_there [Self t, String one]
+                 [Self t, Object one]
+                 [Self t, Object one, String two] : Object
+
+
+    /* A `def` signature has a default implementation, but is a Protocol signature */
+    /* Return type is assumed Object unless otherwised typed */
+    def say_a_greeting [Self t] {
+        /* In here, it's Java */
+        return greeting();
+    }
+
+}
+
+/* We can create FunctionalInterfaces too
+   The method name will be the lower-case name of the Interface. */
+lambda-type IJump [Object something, String another] : Object
+
+/* Lambda Types can also be annotated as Protocols */
+lambda-type protocol IHop [Self t, Number n] : Number
+
+/* Enums are specifically excluded.
+   You should either use clasess/record-likes or code directly in Java if
+    you need per-member interface implementations in the enum */
+
+/* Only functions and values can go in classes.
+   Classes have no public constructor (by default).
+   No subclassing allowed. */
+
+class Computations {
+
+    val start_number = 42
+    val end_number : int = Jloj.apply(Jloj.cljFn("+"), 2, 5, 10, 25)
+    val header : String = Jloj.when((1==1), () -> "Hello "+"World!")
+    val same_number : int = Jloj.apply((x, y) -> x+y, 21, 21)
+    val the_number : Optional<Integer> = Jloj.pipe(40, (x) -> x+4, (y) -> y-1, Jloj.cljFn("dec"), Computations::some_num)
+
+    /* All functions are public static; all args are final */
+    /* If return type is omitted, assumed to be Object. */
+    fn some_num [int t] : int {
+        /* In here, it's Java */
+        return t;
+    }
+
+}
+
+/* Classes can be record-like objects by adding an optional arg-list.
+   All attributes are `public final`, and set by the constructor.
+   Three public constructors are generated - positional args, single List, and single Map (keys are strings of the attrs).
+   Three methods are generated - toMap (PersistentMap), toList (PersistentVector), toString
+   A class can specify all the protocols/interfaces it `implements`, just like Java, but requires the optional arg list (must be a record-like)
+   Signature implementations are defined with `def` */
+
+class Point [Number x, Number y] implements IStep IHop {
+
+    val origin : Point = new Point(0, 0)
+    /* This is just for example - one should prefer `fn` to lambda objects. Reserve using Lambdas for function/method args */
+    val str_compr : Comparator<String> = (lhs, rhs) -> lhs.compareTo(rhs)
+
+    fn another_function [int a] : int {
+        return a;
+    }
+
+    /* IStep */
+    def hi_there [Self t, String one] {
+        return str_compr.compare("hello", one);
+    }
+
+    def hi_there [Self t, Object one] {
+        /* This is mostly just an example - the joiner uses StringBuilder under the hood */
+        return IStep.geeting().chars()
+                              .map(e -> String.valueOf(e))
+                              .collect(Collectors.joining(""));
+    }
+
+    def hi_there [Self t, Object one, String two] {
+        return IStep.say_a_greeting(t);
+    }
+
+    /* IHop */
+    def ihop [Self t, Number n] : Number {
+        return 42;
+    }
+}
+
