@@ -4,7 +4,6 @@
             [instaparse.core :as insta])
   (:import [jloj.lang Jloj Func]))
 
-;; TODO: This is totally broken - symbol escaping in the proto-sigs breaks in the syntax quote
 (defn emit-protocol
     ([iface]
      (emit-protocol iface "" ""))
@@ -38,7 +37,8 @@
                  {:on ~(symbol (str ns-str "." proto-name))
                   :on-interface ~iface
                   :var (var ~proto-sym)
-                  :sigs ~proto-sigs
+                  :sigs '~proto-sigs
+                  ;; TODO: Confirm method-map is built correctly
                   :method-map ~meth-map
                   ;; TODO: Figure out the best way to make the method-builders
                   :method-builders {}}))
@@ -199,7 +199,7 @@
 (comment
 
 
-  (emit-protocol Func)
+  (var-get (emit-protocol Func))
 
   (def example (slurp "example.jloj"))
   (def parse-res (parser example))
@@ -209,16 +209,15 @@
   (handle-segment (nth parse-res 10))
   (handle-segment (nth parse-res 11))
   (handle-segment (nth parse-res 13))
-  (handle-segment (get-in (nth parse-res 18) [1 6 1]))
   (handle-segment (get-in (nth parse-res 10) [1 3 1]))
   (handle-segment (get-in (nth parse-res 10) [1 4 1]))
   (handle-segment (get-in (nth parse-res 10) [1 5 1]))
   (handle-segment (get-in (nth parse-res 10) [1 6 1]))
   (handle-segment (get-in (nth parse-res 10) [1 8 1]))
   (handle-segment (get-in (nth parse-res 10) [1 10 1]))
-  ;; TODO: VVVV
-  (handle-segment (nth parse-res 16))
-  (handle-segment (nth parse-res 18))
+  ;; TODO: Classes
+  (handle-segment (nth parse-res 17))
+  (handle-segment (nth parse-res 19))
   (def parse-transform (insta/transform transform-opts parse-res))
 
   (some-> 1
