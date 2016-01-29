@@ -249,6 +249,9 @@
   (Jloj/and [true nil true])
 
   (.orElse (Jloj/pipe (Jloj/and [true nil true])) 42)
+  (Jloj/or [(Jloj/pipe (Jloj/and [true nil true])) 42])
+  (.orElse (Jloj/pipe 1 [inc (fn [x] nil) inc]) 5)
+  (Jloj/or [(Jloj/pipe 1 [inc (fn [x] nil) inc]) 5])
   (Jloj/or [(Jloj/and [true nil true]) 42])
   (= (Jloj/or [(Jloj/and [true nil true]) false nil "x"])
      (Jloj/or [(Jloj/and [true nil true]) "x" false nil]))
@@ -265,5 +268,7 @@
   (Jloj/cond [true 1
               nil 2
               true 3])
+
+  (deref (Jloj/atom 5))
 
   )
