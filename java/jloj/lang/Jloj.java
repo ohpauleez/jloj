@@ -483,34 +483,48 @@ public class Jloj {
         return some(pred, Arrays.asList(coll));
     }
     public static Optional some(final IFn pred, List<Object> coll) {
+        return some(pred, coll.stream());
+    }
+    public static Optional some(final IFn pred, Stream<Object> coll) {
         return some(x -> truthyBool(pred.invoke(x)), coll);
     }
     public static Optional some(final Func pred, Object... coll) {
         return some(pred, Arrays.asList(coll));
     }
     public static Optional some(final Func pred, List<Object> coll) {
+        return some(pred, coll.stream());
+    }
+    public static Optional some(final Func pred, Stream<Object> coll) {
         return some(x -> truthyBool(pred.invoke(x)), coll);
     }
     public static Optional some(final Predicate pred, Object... coll) {
-        return some(pred, Arrays.asList(coll));
+        return some(pred, Arrays.stream(coll));
     }
     public static Optional some(final Predicate pred, List<Object> coll) {
-        return coll.stream()
-                   .filter(pred)
+        return some(pred, coll.stream());
+    }
+    public static Optional some(final Predicate pred, Stream<Object> coll) {
+        return coll.filter(pred)
                    .findFirst();
     }
 
     /* Like Clojure's `every?` */
     public static boolean every(final IFn pred, Object... coll) {
-        return every(pred, Arrays.asList(coll));
+        return every(pred, Arrays.stream(coll));
     }
     public static boolean every(final IFn pred, List<Object> coll) {
+        return every(pred, coll.stream());
+    }
+    public static boolean every(final IFn pred, Stream<Object> coll) {
         return every(x -> truthyBool(pred.invoke(x)), coll);
     }
     public static boolean every(final Func pred, Object... coll) {
         return every(pred, Arrays.asList(coll));
     }
     public static boolean every(final Func pred, List<Object> coll) {
+        return every(pred, coll.stream());
+    }
+    public static boolean every(final Func pred, Stream<Object> coll) {
         return every(x -> truthyBool(pred.invoke(x)), coll);
     }
     public static boolean every(final Predicate pred, Object... coll) {
@@ -520,6 +534,9 @@ public class Jloj {
     public static boolean every(final Predicate pred, List<Object> coll) {
         return coll.stream()
                    .allMatch(pred);
+    }
+    public static boolean every(final Predicate pred, Stream<Object> coll) {
+        return coll.allMatch(pred);
     }
 
     public static Var defineProtocol(Class iface) {
