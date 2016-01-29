@@ -25,6 +25,7 @@ import clojure.lang.Ref;
 import clojure.lang.Atom;
 import clojure.lang.IAtom;
 import clojure.lang.IDeref;
+import clojure.lang.Settable;
 import clojure.lang.IPersistentMap;
 import clojure.lang.PersistentHashMap;
 import clojure.lang.IPersistentVector;
@@ -754,12 +755,12 @@ public class Jloj {
             return null;
         }
     }
-    public static Object reset(final Var var, final Object val) {
-        return var.set(val);
+    public static Object reset(final Settable settable, final Object val) {
+        return settable.doReset(val);
     }
-    public static Object reset(final Var var, final Optional val) {
+    public static Object reset(final Settable settable, final Optional val) {
         if (val.isPresent()) {
-            return var.set(val.get());
+            return settable.doReset(val.get());
         } else {
             return null;
         }
