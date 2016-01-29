@@ -559,7 +559,7 @@ public class Jloj {
         return RT.seq(coll.orElse(null));
     }
     public static ISeq seq(Stream stream) {
-        return RT.seq(stream.collect(Collectors.toList()));
+        return RT.seq(stream.toArray());
     }
     public static ISeq seq(Object... coll) {
         return ArraySeq.create(coll);
@@ -587,7 +587,7 @@ public class Jloj {
         return PersistentVector.create(init);
     }
     public static IPersistentVector persistentVec(final Stream init) {
-        return PersistentVector.create(init.collect(Collectors.toList()));
+        return RT.vector(init.toArray());
     }
 
     // Mutable/reference types
@@ -774,7 +774,6 @@ public class Jloj {
     public static Object deref(final Optional opt) {
         return opt.orElse(null);
     }
-
 
 }
 
