@@ -586,6 +586,9 @@ public class Jloj {
     public static IPersistentVector persistentVec(final List init) {
         return PersistentVector.create(init);
     }
+    public static IPersistentVector persistentVec(final Stream init) {
+        return PersistentVector.create(init.collect(Collectors.toList()));
+    }
 
     // Mutable/reference types
     // -----------------------
