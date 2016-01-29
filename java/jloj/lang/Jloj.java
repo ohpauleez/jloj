@@ -14,11 +14,26 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.Comparator;
 
+// For Clojure/Java API usage
 import clojure.lang.IFn;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.java.api.Clojure;
 
+// For Clojure interop usage
+import clojure.lang.Ref;
+import clojure.lang.Atom;
+import clojure.lang.IAtom;
+import clojure.lang.IDeref;
+import clojure.lang.IPersistentMap;
+import clojure.lang.PersistentHashMap;
+import clojure.lang.IPersistentVector;
+import clojure.lang.PersistentVector;
+import clojure.lang.ISeq;
+import clojure.lang.ArraySeq;
+import clojure.lang.RT;
+
+// Jloj's foundations
 import jloj.lang.Func;
 
 public class Jloj {
@@ -114,6 +129,10 @@ public class Jloj {
                                .reduce(Stream::concat)
                                .orElseGet(Stream::empty);
     }
+
+    // TODO: Implement `map` across ISeq, List, Array, and Stream.
+    // TODO: Consider making `Seam` - the union of ISeq and Stream, like `Func`
+
 
     /* Like `some->` from Clojure, but with Lamdas/Methods and Clojure Functions
      * This can also be used like `maybe` */
@@ -529,6 +548,230 @@ public class Jloj {
     public static Func cljFn(final String ns, final String symbol) {
         return Func.of(Clojure.var(ns, symbol));
     }
+
+    public static ISeq seq(ISeq coll) {
+        return coll;
+    }
+    public static ISeq seq(Object coll) {
+        return RT.seq(coll);
+    }
+    public static ISeq seq(Optional coll) {
+        return RT.seq(coll.orElse(null));
+    }
+    public static ISeq seq(Stream stream) {
+        return RT.seq(stream.collect(Collectors.toList()));
+    }
+    public static ISeq seq(Object... coll) {
+        return ArraySeq.create(coll);
+    }
+
+    // Data collections
+    // TODO: Create Optional-aware versions of RT's mapUniqueKeys, set, subvec
+    public static IPersistentMap persistentMap(final Object... init) {
+        return RT.map(init);
+    }
+    public static IPersistentMap persistentMap(final Optional init) {
+        return RT.map(init.orElse(null));
+    }
+    public static IPersistentMap persistentMap(final Map init) {
+        return PersistentHashMap.create(init);
+    }
+
+    public static IPersistentVector persistentVec(final Object... init) {
+        return RT.vector(init);
+    }
+    public static IPersistentVector persistentVec(final Optional init) {
+        return RT.vector(init.orElse(null));
+    }
+    public static IPersistentVector persistentVec(final List init) {
+        return PersistentVector.create(init);
+    }
+
+    // Mutable/reference types
+    // -----------------------
+    public static Ref ref() {
+        return new Ref(null);
+    }
+    public static Ref ref(final Object init) {
+        return new Ref(init);
+    }
+    public static Ref ref(final Optional init) {
+        return new Ref(init.orElse(null));
+    }
+    public static Ref ref(final Object init, final IPersistentMap meta) {
+        return new Ref(init, meta);
+    }
+    public static Ref ref(final Optional init, final IPersistentMap meta) {
+        return new Ref(init.orElse(null), meta);
+    }
+
+    public static Object commute(final Ref ref, final IFn fn, final Object... args) {
+        return ref.commute(fn, seq(args));
+    }
+    public static Object commute(final Ref ref, final IFn fn, final List args) {
+        return ref.commute(fn, seq(args));
+    }
+    public static Object commute(final Ref ref, final IFn fn, final Optional args) {
+        return ref.commute(fn, seq(args.orElse(null)));
+    }
+    public static Object commute(final Ref ref, final IFn fn, final ISeq args) {
+        return ref.commute(fn, args);
+    }
+    // We can commute with Function/BiFunction, but we're going to have to pack args up differently.
+    // This will make semantics wonky, but it'll behave as expected if you're using Lambdas
+    public static Object commute(final Ref ref, final Function fn) {
+        return ref.commute(Func.of(fn), null);
+    }
+    public static Object commute(final Ref ref, final BiFunction fn, final Object arg) {
+        return ref.commute(Func.of(fn), seq(new Object[]{arg}));
+    }
+    public static Object commute(final Ref ref, final BiFunction fn, final Optional arg) {
+        return ref.commute(Func.of(fn), arg.isPresent() ? seq(new Object[]{arg.get()}) : null);
+    }
+
+    public static Object alter(final Ref ref, final IFn fn, final Object... args) {
+        return ref.alter(fn, seq(args));
+    }
+    public static Object alter(final Ref ref, final IFn fn, final List args) {
+        return ref.alter(fn, seq(args));
+    }
+    public static Object alter(final Ref ref, final IFn fn, final Optional args) {
+        return ref.alter(fn, seq(args.orElse(null)));
+    }
+    public static Object alter(final Ref ref, final IFn fn, final ISeq args) {
+        return ref.alter(fn, args);
+    }
+    // We can alter with Function/BiFunction, but we're going to have to pack args up differently.
+    // This will make semantics wonky, but it'll behave as expected if you're using Lambdas
+    public static Object alter(final Ref ref, final Function fn) {
+        return ref.alter(Func.of(fn), null);
+    }
+    public static Object alter(final Ref ref, final BiFunction fn, final Object arg) {
+        return ref.alter(Func.of(fn), seq(new Object[]{arg}));
+    }
+    public static Object alter(final Ref ref, final BiFunction fn, final Optional arg) {
+        return ref.alter(Func.of(fn), arg.isPresent() ? seq(new Object[]{arg.get()}) : null);
+    }
+
+    public static Atom atom() {
+        return new Atom(null);
+    }
+    public static Atom atom(final Object init) {
+        return new Atom(init);
+    }
+    public static Atom atom(final Optional init) {
+        return new Atom(init.orElse(null));
+    }
+    public static Atom atom(final Object init, final IPersistentMap meta) {
+        return new Atom(init, meta);
+    }
+    public static Atom atom(final Optional init, final IPersistentMap meta) {
+        return new Atom(init.orElse(null), meta);
+    }
+
+    public static Object swap(IAtom atom, IFn fn) {
+        return atom.swap(fn);
+    }
+    public static Object swap(IAtom atom, Function fn) {
+        return atom.swap(Func.of(fn));
+    }
+    public static Object swap(IAtom atom, IFn fn, Object arg) {
+        return atom.swap(fn, arg);
+    }
+    public static Object swap(IAtom atom, IFn fn, Optional arg) {
+        if (arg.isPresent()) {
+            return atom.swap(fn, arg.get());
+        } else {
+            return null;
+        }
+    }
+    public static Object swap(IAtom atom, BiFunction fn, Object arg) {
+        return atom.swap(Func.of(fn), arg);
+    }
+    public static Object swap(IAtom atom, BiFunction fn, Optional arg) {
+        if (arg.isPresent()) {
+            return atom.swap(Func.of(fn), arg.get());
+        } else {
+            return null;
+        }
+    }
+    public static Object swap(IAtom atom, IFn fn, Object arg1, Object arg2) {
+        return atom.swap(fn, arg1, arg2);
+    }
+    public static Object swap(IAtom atom, IFn fn, Object arg1, Optional arg2) {
+        if (arg2.isPresent()) {
+            return atom.swap(fn, arg1, arg2.get());
+        } else {
+            return null;
+        }
+    }
+    public static Object swap(IAtom atom, IFn fn, Object arg1, Object arg2, Object... args) {
+        return atom.swap(fn, arg1, arg2, seq(args));
+    }
+
+    public static boolean compareAndSet(IAtom atom, Object oldv, Object newv) {
+        return atom.compareAndSet(oldv, newv);
+    }
+    public static boolean compareAndSet(IAtom atom, Optional oldv, Object newv) {
+        return atom.compareAndSet(oldv.orElse(null), newv);
+    }
+    public static boolean compareAndSet(IAtom atom, Object oldv, Optional newv) {
+        return atom.compareAndSet(oldv, newv.orElse(null));
+    }
+    public static boolean compareAndSet(IAtom atom, Optional oldv, Optional newv) {
+        return atom.compareAndSet(oldv.orElse(null), newv.orElse(null));
+    }
+
+
+    // UberReset - this set method should work across all types
+    public static Object reset(final Ref ref, final Object val) {
+        return ref.set(val);
+    }
+    public static Object reset(final Ref ref, final Optional val) {
+        if (val.isPresent()) {
+            return ref.set(val.get());
+        } else {
+            return null;
+        }
+    }
+    public static Object reset(final Var var, final Object val) {
+        return var.set(val);
+    }
+    public static Object reset(final Var var, final Optional val) {
+        if (val.isPresent()) {
+            return var.set(val.get());
+        } else {
+            return null;
+        }
+    }
+    public static Object reset(final IAtom atom, final Object val) {
+        return atom.reset(val);
+    }
+    public static Object reset(final IAtom atom, final Optional val) {
+        if (val.isPresent()) {
+            return atom.reset(val.get());
+        } else {
+            return null;
+        }
+    }
+    // This works, but it feels totally gross
+    /*public static Object reset(Optional opt, final Object val) {
+        opt = Optional.ofNullable(val);
+        return opt;
+    }
+    public static Object reset(Optional opt, final Optional val) {
+        opt = val;
+        return opt;
+    }*/
+
+    // UberDeref
+    public static Object deref(final IDeref derefable) {
+        return derefable.deref();
+    }
+    public static Object deref(final Optional opt) {
+        return opt.orElse(null);
+    }
+
 
 }
 
