@@ -134,11 +134,19 @@ public class Jloj {
     // TODO: Implement `map` across ISeq, List, Array, and Stream.
     // TODO: Consider making `Seam` - the union of ISeq and Stream, like `Func`
 
+    /* Like ML's SOME and NONE*/
+    public static Optional<Object> SOME(final Object x) {
+        return (x instanceof Optional) ? (Optional) x : Optional.ofNullable(x);
+    }
+    public static Optional<Object> NONE = Optional.empty();
+    public static boolean isNone(final Object x) {
+        return (x == NONE) || (x == null);
+    }
 
     /* Like `some->` from Clojure, but with Lamdas/Methods and Clojure Functions
      * This can also be used like `maybe` */
     public static Optional pipe(final Object x) {
-        return (x instanceof Optional) ? (Optional) x : Optional.ofNullable(x);
+        return SOME(x);
     }
     public static Optional pipe(final Object x, final Function... fns) {
         // Note: xomp does not correctly nil pun or short-circuit via Optional

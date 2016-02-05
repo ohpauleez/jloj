@@ -229,6 +229,16 @@
   (.orElse (Jloj/pipe 1) 5)
   (.orElse (Jloj/pipe nil) 5)
 
+  (import '(java.util Optional))
+  (= Jloj/NONE (Optional/empty))
+  (= Jloj/NONE (Jloj/pipe nil))
+  (= Jloj/NONE (Jloj/SOME nil))
+  (Jloj/isNone Jloj/NONE)
+  (Jloj/isNone nil)
+  (Jloj/isNone 5)
+  (Jloj/or [Jloj/NONE 5])
+
+
   (or (some-> 1
           inc
           ((fn [x] nil))
